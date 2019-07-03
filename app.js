@@ -38,14 +38,50 @@ const corsOptions = {
 
 
 app.get('/amp-access', cors(corsOptions), (req, res) => {
+  console.log("amp-access called");
   res.setHeader('AMP-Access-Control-Allow-Source-Origin', _origin);
   res.setHeader('Access-Control-Expose-Headers', 'AMP-Access-Control-Allow-Source-Origin');
   if (req.cookies.tokenID) {
     const decoded = jwtDecode(req.cookies.tokenID);
-    res.json({ user: true, given_name: decoded.given_name, email: decoded.email });
+    res.json({ 
+      user: true,
+      given_name: decoded.given_name,
+      email: decoded.email,
+      picture: decoded.picture,
+    });
   }
   else {
     res.json({ user: false  });
+  }
+});
+
+app.get('/amp-subscriptions', cors(corsOptions), (req, res) => {
+  console.log("amp-subscriptions called");
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin', _origin);
+  res.setHeader('Access-Control-Expose-Headers', 'AMP-Access-Control-Allow-Source-Origin');
+  if (req.cookies.tokenID) {
+    const decoded = jwtDecode(req.cookies.tokenID);
+    const data = {
+      loggedIn: true,
+      given_name: decoded.given_name,
+      email: decoded.email,
+      picture: decoded.picture,
+    };
+    console.log(data);
+    res.json({
+      granted: true,
+      grantReason: "SUBSCRIBER",
+      data : data
+    });
+  }
+  else {
+    res.json({
+      granted: false,
+      grantReason: "SUBSCRIBER",
+      data : {
+        loggedIn: false
+      }
+    });
   }
 });
 
