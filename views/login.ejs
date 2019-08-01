@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <title>Sign In</title>
+    <style>
+        /* Full-width inputs */
+        input[type=text],
+        input[type=password] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        input[type=submit] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border-radius: 8px;
+            background-color: #008CBA;
+            border: none;
+            color: white;
+            text-align: center;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <form method="post" action="/login-form" id="login-form">
+        <input id="form-return" name="returnurl" type="hidden" value="">
+        <label for="username"><b>Username</b></label>
+        <input name="username" type="text">
+        <label for="password"><b>Password</b></label>
+        <input name="password" type="password">
+        <input type="submit" value="Sign In" class="button">
+    </form>
+    <script>
+        window.addEventListener('load', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnURL = urlParams.get('return');
+            document.getElementById("form-return").value = returnURL;
+        })
+    </script>
+</body>
+
+</html>

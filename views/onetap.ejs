@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <title>RP OneTap Page</title>
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <div id='rp-onetap-iframe-container'></div>
   <script async src="http://kefany.svl.corp.google.com:9879/gsi/client"></script>
+  <script async src="js/onetap.js"></script>
 </head>
 <style>
   #rp-onetap-iframe-container {
@@ -18,128 +18,21 @@
     width: 375px;
     z-index: 9999
   }
+  #rp-onetap-iframe-container iframe{
+    border: none;
+  }
 </style>
 
 <body>
   <script>
-    const whitelist = ['http://localhost:3000', 'http://localhost:8000', 'http://ampcache.com:8000'];
-    const ACTIONS = {
-      RESIZE: 'resize',
-      REDIRECT: 'redirect',
-      UI_MODE: 'ui_mode',
-      CLOSE: 'close',
-      CLICK_CANCEL: 'click_cancel',
-    }
-
-    let parentOrigin = document.referrer ? (new URL(document.referrer)).origin : null;
-
-    function allowOrigin() {
-      const origin = parentOrigin;
-      if (whitelist.indexOf(origin) != -1) {
-        return origin;
-      }
-      console.log('origin not matched');
-      return null;
-    }
-
-    function handleActivity(activity) {
-      console.log(activity);
-      if (parent === window) {
-        return;
-      }
-      if (activity.type === 'ui_change') {
-        if (activity.uiActivityType === 'prompt_resized') {
-          parent.postMessage({ action: ACTIONS.RESIZE, detail: { newHeight: activity.detail.newHeight } }, allowOrigin());
-        }
-        else if (activity.uiActivityType === 'ui_mode_changed') {
-          parent.postMessage({ action: ACTIONS.UI_MODE, detail: { uiMode: activity.detail.uiMode } }, allowOrigin());
-        }
-        else if (activity.uiActivityType === 'prompt_displayed') {
-          parent.postMessage({ action: ACTIONS.DISPLAY }, allowOrigin());
-        }
-        else if (activity.uiActivityType === 'prompt_closed') {
-          parent.postMessage({ action: ACTIONS.CLOSE }, allowOrigin());
-        }
-        else {
-          // Do nothing.
-        }
-      }
-    }
-
-    function handlePostMessage(data) {
-      switch (data.action) {
-        case ACTIONS.CLICK_CANCEL:
-          google.accounts.id.cancel(); 
-          break;
-        default:
-          console.log(data);
-      }
-    }
-
-    function formPost(url, data) {
-      const form = document.createElement('form');
-      document.body.appendChild(form);
-      form.method = 'post';
-      form.action = url;
-      if (data) {
-        Object.keys(data).map((name) => {
-          let input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = name;
-          input.value = data[name];
-          form.appendChild(input);
-        });
-      }
-      form.submit();
-    }
-    function xhrPost(url, data, callback) {
-      let formData = new FormData();
-      if (data) {
-        Object.keys(data).map((name) => {
-          formData.append(name, data[name]);
-        });
-      }
-      const request = new XMLHttpRequest();
-      if (callback) {
-        request.onreadystatechange = () => {
-          callback(request);
-        };
-      }
-      request.open('POST', url, true);
-      request.send(formData);
-    }
-
-    window.addEventListener('load', () => {
-      window.addEventListener('message', (event) => {
-        handlePostMessage(event.data);
+    addEventListener('load', function(){
+      initializeOneTapScript({
+        client_id: '114029609392094723033',
+        auto_select: false,
+        login_url: 'http://localhost:3000/login-xhr',
+        redirect_url: undefined,
+        parent_origin: ['http://localhost:3000', 'http://localhost:8000', 'http://example.com:8000'],
       });
-      const iframe = document.getElementById('credential_picker_iframe');
-      const baseUrl = 'http://kefany.svl.corp.google.com:9879';
-      if (true) {
-        const options = {
-          client_id: '114029609392094723033',
-          prompt_url: `${baseUrl}/gsi/iframe/select`,
-          status_url: `${baseUrl}/gsi/status`,
-          auto_select: false,
-          activity_listener: handleActivity,
-          prompt_parent_id: 'rp-onetap-iframe-container',
-          callback: (credentialResponse) => {
-            let postBody = {};
-            postBody['credential'] = credentialResponse['credential'];
-            xhrPost('http://localhost:3000/login-xhr', postBody, (xhr) => {
-              if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-                if (parent && parent.postMessage) {
-                  parent.postMessage({ action: 'redirect' }, allowOrigin());
-                }
-              }
-            });
-          },
-        };
-        google.accounts.id.initialize(options);
-        google.accounts.id.prompt();
-      } else {
-        //form submit
-      }
     })
   </script>
 </body>
