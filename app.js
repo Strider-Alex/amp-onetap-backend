@@ -148,7 +148,6 @@ app.get('/onetap', (req, res) => {
 })
 
 app.get('/oauth/google-sign-in', cors(corsOptions), (req, res) => {
-  console.log(req.query.return);
   const returnURL = req.query.return;
   const stateStr = base64url(`{ "returnURL":"${returnURL}" }`);
   res.redirect(`https://gaiastaging.corp.google.com/o/oauth2/auth?`
@@ -166,7 +165,6 @@ app.get('/oauth/google-sign-in-redirect', cors(corsOptions), (req, res) => {
     res.send(error);
   }
   else {
-    console.log(req.query);
     console.log(JSON.parse(base64url.decode(req.query.state)));
     const returnURL = JSON.parse(base64url.decode(req.query.state)).returnURL;
     const postData = {
