@@ -12,12 +12,13 @@ const ACTIONS = {
 
 const CONTAINER_ID = 'rp-onetap-iframe-container';
 
-let parentOrigin = document.referrer ? (new URL(document.referrer)).origin : null;
+let parentOrigin =
+    document.referrer ? (new URL(document.referrer)).origin : null;
 
 function allowOrigin_(whitelist) {
   const origin = parentOrigin;
   if (whitelist.indexOf(origin) != -1) {
-    return origin; 
+    return origin;
   }
   console.log('origin not matched');
   return null;
@@ -30,18 +31,21 @@ function handleActivity_(whitelist, activity) {
   }
   if (activity.type === 'ui_change') {
     if (activity.uiActivityType === 'prompt_resized') {
-      parent.postMessage({ action: ACTIONS.RESIZE, detail: { newHeight: activity.detail.newHeight } }, allowOrigin_(whitelist));
-    }
-    else if (activity.uiActivityType === 'ui_mode_changed') {
-      parent.postMessage({ action: ACTIONS.UI_MODE, detail: { uiMode: activity.detail.uiMode } }, allowOrigin_(whitelist));
-    }
-    else if (activity.uiActivityType === 'prompt_displayed') {
-      parent.postMessage({ action: ACTIONS.DISPLAY }, allowOrigin_(whitelist));
-    }
-    else if (activity.uiActivityType === 'prompt_closed') {
-      parent.postMessage({ action: ACTIONS.CLOSE }, allowOrigin_(whitelist));
-    }
-    else {
+      parent.postMessage(
+          {
+            action: ACTIONS.RESIZE,
+            detail: {newHeight: activity.detail.newHeight}
+          },
+          allowOrigin_(whitelist));
+    } else if (activity.uiActivityType === 'ui_mode_changed') {
+      parent.postMessage(
+          {action: ACTIONS.UI_MODE, detail: {uiMode: activity.detail.uiMode}},
+          allowOrigin_(whitelist));
+    } else if (activity.uiActivityType === 'prompt_displayed') {
+      parent.postMessage({action: ACTIONS.DISPLAY}, allowOrigin_(whitelist));
+    } else if (activity.uiActivityType === 'prompt_closed') {
+      parent.postMessage({action: ACTIONS.CLOSE}, allowOrigin_(whitelist));
+    } else {
       // Do nothing.
     }
   }
@@ -50,7 +54,7 @@ function handleActivity_(whitelist, activity) {
 function handlePostMessage_(data) {
   switch (data.action) {
     case ACTIONS.CLICK_CANCEL:
-      google.accounts.id.cancel(); 
+      google.accounts.id.cancel();
       break;
     default:
       console.log(data);
@@ -74,7 +78,7 @@ function xhrPost_(url, data, callback) {
   request.send(formData);
 }
 
-function initializeOneTapScript(options){
+function initializeOneTapScript(options) {
   window.addEventListener('message', (event) => {
     handlePostMessage_(event.data);
   });
@@ -95,12 +99,14 @@ function initializeOneTapScript(options){
       xhrPost_(options.login_url, postBody, (xhr) => {
         if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
           if (parent && parent.postMessage) {
-            parent.postMessage({ 
-              action: 'redirect',
-              detail: {
-                url: options.redirect_url,
-              }
-            }, allowOrigin_(options.parent_origin));
+            parent.postMessage(
+                {
+                  action: 'redirect',
+                  detail: {
+                    url: options.redirect_url,
+                  }
+                },
+                allowOrigin_(options.parent_origin));
           }
         }
       });
